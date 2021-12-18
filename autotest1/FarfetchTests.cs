@@ -23,7 +23,6 @@ namespace AutomatedTests
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
             driver.Manage().Window.Maximize();
             driver.Navigate().GoToUrl("https://www.farfetch.com/ru");
-            //driver.FindElement(By.XPath("//button[contains(.,'Я согласен')]")).Click();
         }
 
         [Test]
@@ -41,15 +40,15 @@ namespace AutomatedTests
 
             driver.FindElement(By.XPath("//*[@data-testid='price-input-min']")).Clear();
             driver.FindElement(By.XPath("//input[@data-testid='price-input-min']")).SendKeys("10000");
-            new WebDriverWait(driver, TimeSpan.FromSeconds(40)).Until(x => driver.FindElement(By.XPath("(//input[@data-testid='price-input-max'])")));
+            new WebDriverWait(driver, TimeSpan.FromSeconds(40)).Until(x => driver.FindElement(By.XPath("//input[@data-testid='price-input-max']")));
             driver.FindElement(By.XPath("(//input[@data-testid='price-input-max'])")).Clear();
             driver.FindElement(By.XPath("(//input[@data-testid='price-input-max'])")).SendKeys("45000");
             driver.FindElement(By.XPath("(//input[@data-testid='price-input-max'])")).SendKeys(Keys.Enter);
 
-            Thread.Sleep(5000);
+            new WebDriverWait(driver, TimeSpan.FromSeconds(40)).Until(x => driver.FindElements(By.XPath("//*[@data-component='Price']")));
             var webPrices = driver.FindElements(By.XPath("//*[@data-component='Price']"));
+            new WebDriverWait(driver, TimeSpan.FromSeconds(40)).Until(x => driver.FindElements(By.XPath("//*[@data-component='PriceOriginal']")));
             if (driver.FindElements(By.XPath("//*[@data-component='PriceOriginal']")).Any()) webPrices = driver.FindElements(By.XPath("//*[@data-component='PriceFinal']"));
-
 
             int[] actualPrices = webPrices.Select(webPrice => Int32.Parse(Regex.Replace(webPrice.Text, @"\D+", ""))).ToArray();
             actualPrices.ToList().ForEach(price => Assert.IsTrue(price >= 10000 && price <= 45000));
@@ -58,28 +57,23 @@ namespace AutomatedTests
         [Test]
         public void TestAddToCartButtonTooltipText()
         {
-            driver.FindElement(By.XPath("//a[@data-test='header-gender-tab-248']")).Click();
-            driver.FindElement(By.XPath("//*[@data-nav='/ru/shopping/men/shoes-2/items.aspx']")).Click();
-            new WebDriverWait(driver, TimeSpan.FromSeconds(40)).Until(x => driver.FindElement(By.XPath("//button[@aria-label='Close Dialog']")));
-            driver.FindElement(By.XPath("//button[@aria-label='Close Dialog']")).Click();
-            var firstButtonAddToCart = driver.FindElement(By.XPath("//*[@itemid='/ru/shopping/men/alexander-mcqueen--item-14838238.aspx?storeid=9154']"));
-            new Actions(driver).MoveToElement(firstButtonAddToCart.FindElement(By.XPath(".//*[@data-component='ProductCardInfo']"))).Build().Perform();
-            Assert.IsTrue(firstButtonAddToCart.FindElements(By.XPath(".//*[@data-component='ProductCardSizes']")).Any(),
-                "Tooltip on 'Add item to card' has not appeared");
-            Assert.AreEqual(firstButtonAddToCart.FindElement(By.XPath(".//*[@data-component='ProductCardSizesAvailable']")).Text.Trim(), "Посмотреть размеры",
+            driver.FindElement(By.XPath("//button[@data-tstid='country_selector_btn_desktop']")).Click();
+            Assert.IsTrue(driver.FindElements(By.XPath(".//*[@class='_e9e1a6 css-1e3yvoj-Kicker e1lqpzq10']")).Any(),
+                "Tooltip on 'Country Selector' has not appeared");
+            Assert.AreEqual(driver.FindElement(By.XPath(".//*[@class='_e9e1a6 css-1e3yvoj-Kicker e1lqpzq10']")).Text.Trim(), "СТРАНА ИЛИ РЕГИОН ДОСТАВКИ",
                 "Incorrect tooltip text");
         }
 
         [Test]
         public void NegativeTestPhoneNumberConfirmationWithEmptyPhoneNumber()
         {
-            driver.FindElement(By.XPath("//button[@class='_8726cb _69c4f3 _c24f4f']")).Click();
+            driver.FindElement(By.XPath("//button[@data-test='go-to-login-desktop']")).Click();
             driver.FindElement(By.XPath("//*[@id='tabs--2--tab--1']")).Click();
             driver.FindElement(By.XPath("//*[@name='name']")).SendKeys("Test");
             driver.FindElement(By.XPath("//*[@id='register-email']")).SendKeys("shjfgshjds534.yhft@mail.ru");
             driver.FindElement(By.XPath("//*[@name='password']")).SendKeys("Autotest");
             Assert.IsTrue(driver.FindElements(By.XPath("//button[@type = 'submit'and not(@disabled)]")).Any(),
-                "Error");
+                "Button 'Зарегистрироваться' is enabled when input fields is empty");
         }
 
         [TearDown]
