@@ -57,11 +57,12 @@ namespace AutomatedTests
         [Test]
         public void TestAddToCartButtonTooltipText()
         {
-            driver.FindElement(By.XPath("//button[@data-tstid='country_selector_btn_desktop']")).Click();
-            Assert.IsTrue(driver.FindElements(By.XPath(".//*[@class='_e9e1a6 css-1e3yvoj-Kicker e1lqpzq10']")).Any(),
-                "Tooltip on 'Country Selector' has not appeared");
-            Assert.AreEqual(driver.FindElement(By.XPath(".//*[@class='_e9e1a6 css-1e3yvoj-Kicker e1lqpzq10']")).Text.Trim(), "СТРАНА ИЛИ РЕГИОН ДОСТАВКИ",
-                "Incorrect tooltip text");
+            new WebDriverWait(driver, TimeSpan.FromSeconds(5)).Until(x => new Actions(driver).MoveToElement(driver.FindElement(By.XPath("//button[@data-test='go-to-login-desktop']"))));
+            new Actions(driver).MoveToElement(driver.FindElement(By.XPath("//button[@data-test='go-to-login-desktop']"))).Build().Perform();
+            Assert.IsTrue(driver.FindElements(By.XPath("//button[@data-test='go-to-login-desktop']")).Any(),
+                "Tooltip on 'Страница входа' has not appeared");
+            var title = driver.FindElement(By.XPath("//button[@data-test='go-to-login-desktop']")).GetAttribute("title");
+            Assert.AreEqual(title, "Страница входа", "Incorrect tooltip text");
         }
 
         [Test]
